@@ -28,6 +28,9 @@ public class ChatbotController {
 	@Qualifier("chatbotsttservice")
 	ChatbotSTTServiceImpl sttservice;
 	
+	@Autowired
+	@Qualifier("pizzaservice")
+	PizzaServiceImpl pizzaservice;
 	
 	
 	@GetMapping("/chatbotrequest")
@@ -94,6 +97,11 @@ public class ChatbotController {
 	public @ResponseBody String chatbotstt(String mp3file){
 		String text = sttservice.test(mp3file, "Kor");
 		return text;
+	}
+	
+	@GetMapping("/pizzaorder")
+	public @ResponseBody int pizzaorder(PizzaDTO dto){
+		return pizzaservice.insertPizza(dto);
 	}
 	
 	

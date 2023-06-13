@@ -8,6 +8,16 @@
 <script src="/js/jquery-3.6.4.min.js"></script>
 <script>
 $(document).ready(function(){
+	$('#request').focus();
+	
+	const request= document.getElementById("request");
+	request.addEventListener("keydown", function(event) {
+	 if (event.keyCode === 13) {
+	   event.preventDefault(); 
+	   $("#event1").click(); 
+	 }
+	});//keydown
+	
 	$("input:button").on('click',function(){
 		$('#response').append("질문 : "+$('#request').val()+"<br>");
 		$.ajax({
@@ -46,30 +56,44 @@ $(document).ready(function(){
 							var split_result = order_reply.split(" ");
 							var kind = split_result[0];
 							var size = split_result[1];
+							var phone = split_result[3]; //01012341234으로
+							phone = phone.substring(0,phone.indexOf("으로"));
 							
 							var kinds = ["콤비네이션피자","소세지크림치즈피자","파인애플피자"];
 							var prices = [10000,15000,12000];
 							//소=기본 중=기본+2000 대=기본+5000 특대=기본+10000
 							
-							var totalprice = 0;
+							var price = 0;
 							for(let i=0; i<kinds.length; i++){
 								if(kind == kinds[i]){
-									totalprice += prices[i];
+									price += prices[i];
 									break;
 								}
 							}
 							
 							if(size == "특대"){
-								totalprice += 10000;
+								price += 10000;
 							}else if(size == "대"){
-								totalprice += 5000;
+								price += 5000;
 							}else if(size == "중"){
-								totalprice += 2000;
+								price += 2000;
 							}
+							$('#response').append("총 지불 가격은 "+price+"원 입니다. ");
 							
-							$('#response').append("총 지불 가격은 "+totalprice+"원 입니다.");
-							
-							
+							$.ajax({
+								url : "pizzaorder",
+								data : {
+									"kind" : kind,
+									"size" : size,
+									"phone" : phone,
+									"price" : price
+								},
+								type : "get",
+								success : function(server){
+									$('#response').append(server+"건의 주문을 등록완료하였습니다.");
+								},
+								error : function(e){alert(e);}
+							}); //ajax
 						}
 						
 						
@@ -121,6 +145,9 @@ $(document).ready(function(){
 			},//success
 			error : function(e){console.log(e);}
 		})//ajax end
+		
+		$('#request').val("");
+		$('#request').focus();
 	});//onclick
 });
 </script>

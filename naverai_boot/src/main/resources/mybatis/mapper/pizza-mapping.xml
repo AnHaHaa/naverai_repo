@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="chatbot.PizzaMapper"> <!-- Mapper 어노테이션 필수!!★ -->
+
+	<insert id="insertPizza" parameterType="pizza">
+		insert into pizza(kind, size, phone, price, ordertime)
+		values(#{kind}, #{size}, #{phone}, #{price}, now());
+	</insert>
+
+</mapper>
