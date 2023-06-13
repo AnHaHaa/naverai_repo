@@ -1,17 +1,34 @@
 package chatbot;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.example.ai.MyNaverInform;
 
 @Controller
 public class ChatbotController {
 	@Autowired
 	@Qualifier("chatbotservice")
 	ChatbotServiceImpl service;
+	
+	@Autowired
+	@Qualifier("chatbotttsservice")
+	ChatbotTTSServiceImpl ttsservice;
+	
+	@Autowired
+	@Qualifier("chatbotsttservice")
+	ChatbotSTTServiceImpl sttservice;
+	
+	
 	
 	@GetMapping("/chatbotrequest")
 	public String chatbotrequest() {
@@ -55,4 +72,29 @@ public class ChatbotController {
 		}
 		return response;
 	}
+	
+	@GetMapping("/chatbottts")
+	public @ResponseBody String chatbottts(String text) {
+		String mp3 = ttsservice.test(text); //답변텍스트를 해당경로 저장, mp3파일이름 리턴
+		return "{\"mp3\" : \""+mp3+"\"}";
+	}
+	
+	//음성 질문 서버 업로드
+	@PostMapping("/mp3upload")
+	public @ResponseBody String mp3upload(MultipartFile file1) throws IllegalStateException, IOException {
+		String uploadFile = file1.getOriginalFilename(); //a.mp3
+		String uploadPath = MyNaverInform.path;
+		File saveFile = new File(uploadPath+uploadFile);
+		file1.transferTo(saveFile);
+		return "{\"result\":\"잘 받았습니다.\"}";
+	}
+
+	//업로드한 음성질문 mp3파일을 텍스트파일 변환
+	@GetMapping("/chatbotstt")
+	public @ResponseBody String chatbotstt(String mp3file){
+		String text = sttservice.test(mp3file, "Kor");
+		return text;
+	}
+	
+	
 }

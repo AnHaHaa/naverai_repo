@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+</head>
+<body>
+<button id='record'>녹음시작</button>
+<button id='stop'>녹음종료</button>
+<div id='sound'></div>
+
+<script>
+let record = document.getElementById("record");
+let stop = document.getElementById("stop");
+let sound = document.getElementById("sound");
+
+//브라우저 녹음기나 카메라 사용 지원여부
+if(navigator.mediaDevices){
+	console.log("지원 가능");
+	var constraint = {"audio":true};
+}
+//녹음 진행하는 동안 blob 객체 생성 - 녹음 종료시 mp3파일 생성
+let chunks = [];
+navigator.mediaDevices.getUserMedia(constraint).then(function(stream){
+	var mediaRecorder = new MediaRecorder(stream);
+	record.onclick = function(){
+		mediaRecorder.start();
+		record.style.backgroundColor = "blue";
+		record.style.color = "red";
+	}
+	stop.onclick = function(){
+		mediaRecorder.stop();
+		record.style.backgroundColor = "";
+		record.style.color = "";
+		
+	}
+	
+	//녹음 시작 상태면 chunks에 녹음 데이터 저장
+	mediaRecorder.ondataavailable = function(d){
+		chunks.push(d.data);
+	}
+	
+	//녹음 정지 상태이면 mp3만들어라
+	mediaRecorder.onstop = function(){
+		//audio태그 추가
+		var audio = document.createElement("audio");
+		audio.setAttribute("controls","");
+		audio.controls = true;
+		sound.appendChild(audio);
+		
+		//녹음 데이터 가져와서 blob->mp3->audio 태그 재생
+		var blob = new Blob(chunks, {"type":"audio/mp3"});
+		var mp3url = URL.createObjectURL(blob);
+		audio.src = mp3url;
+		
+		//다음 녹음 위해 chunks초기화
+		chunks = [];
+		
+		//
+		var a = document.createElement("a");
+		sound.appendChild(a);
+		a.href=mp3url;
+		a.innerHTML="파일로 저장";
+		a.download = "a.mp3"
+		
+	}
+	
+	
+	
+}) // then end
+.catch(function(err){
+	console.log("오류발생 : "+err);
+});
+
+
+
+</script>
+
+
+</body>
+</html>
